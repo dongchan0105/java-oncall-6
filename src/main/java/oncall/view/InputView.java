@@ -14,4 +14,6 @@ public class InputView {
         System.out.println("EMERGENCY_TABLE_USER_INPUT");
         return InputValidator.validateEmpty(Console.readLine());
     }
+
+
 }
