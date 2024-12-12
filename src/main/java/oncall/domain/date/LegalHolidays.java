@@ -1,5 +1,8 @@
 package oncall.domain.date;
 
+import java.time.LocalDate;
+import java.util.Arrays;
+
 public enum LegalHolidays {
     NEW_YEARS_DAY(1,1),
     SAMILJEOL(3,1),
@@ -26,4 +29,10 @@ public enum LegalHolidays {
     public int getDay() {
         return day;
     }
+
+    public boolean isHoliday(int month, int day) {
+        return Arrays.stream(LegalHolidays.values())
+                .anyMatch(holiday -> holiday.getMonth() == month && holiday.getDay() == day);
+    }
+
 }

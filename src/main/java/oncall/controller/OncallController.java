@@ -10,6 +10,7 @@ import oncall.domain.date.Days;
 import oncall.domain.date.Month;
 import oncall.service.OncallService;
 import oncall.util.Parser;
+import oncall.util.WorkersValidator;
 import oncall.view.ErrorView;
 import oncall.view.InputView;
 import oncall.view.OutputView;
@@ -32,11 +33,15 @@ public class OncallController {
     public void run() {
         Map<Month,Days> userWorkDate=requestMonthAndDay();
         Workers weekendWorks=requestWeekendWorker();
-        Workers holidayWorks=requestHolidayWorker();
+        Workers holidayWorks=requestHolidayWorker(weekendWorks);
     }
 
-    private void makeSchedule(){
-
+    private void setServiceValue(Map<Month,Days> userWorkDate,Workers weekendWorks,Workers holidayWorks){
+        Map.Entry<Month, Days> entry = userWorkDate.entrySet().iterator().next();
+        Month month=entry.getKey();
+        Days days=entry.getValue();
+        oncallService.setMonthAndDay(month,days);
+        oncallService.setWorkers(weekendWorks,holidayWorks);
     }
 
     private Map<Month, Days> requestMonthAndDay() {
@@ -56,19 +61,22 @@ public class OncallController {
             Deque<Employee> employees=new ArrayDeque<>(Arrays.stream(Parser.splitWithDelimiter(inputView.getWeekDayWorkOrder()))
                     .map(Employee::new)
                     .toList());
-            return new Workers(employees);
+            return new Workers (employees);
+
         } catch (IllegalArgumentException e) {
             errorView.printErrorMessage(e.getMessage());
             return requestWeekendWorker();
         }
     }
 
-    private Workers requestHolidayWorker(){
+    private Workers requestHolidayWorker(Workers weekendWorker){
         try{
             Deque<Employee> employees=new ArrayDeque<>(Arrays.stream(Parser.splitWithDelimiter(inputView.getHolidayDayWorkOrder()))
                     .map(Employee::new)
                     .toList());
-            return new Workers(employees);
+            Workers holidayWorker = new Workers(employees);
+            WorkersValidator.validateWorker(weekendWorker,holidayWorker);
+            return holidayWorker;
         } catch (IllegalArgumentException e) {
             errorView.printErrorMessage(e.getMessage());
             return requestWeekendWorker();
