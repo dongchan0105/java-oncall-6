@@ -1,4 +1,4 @@
-package oncall.domain;
+package oncall.domain.date;
 
 public enum LegalHolidays {
     NEW_YEARS_DAY(1,1),

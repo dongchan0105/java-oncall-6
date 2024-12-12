@@ -1,9 +1,13 @@
 package oncall.controller;
 
-import java.util.HashMap;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Deque;
 import java.util.Map;
-import oncall.domain.Days;
-import oncall.domain.Month;
+import oncall.domain.Employee;
+import oncall.domain.Workers;
+import oncall.domain.date.Days;
+import oncall.domain.date.Month;
 import oncall.service.OncallService;
 import oncall.util.Parser;
 import oncall.view.ErrorView;
@@ -27,6 +31,12 @@ public class OncallController {
 
     public void run() {
         Map<Month,Days> userWorkDate=requestMonthAndDay();
+        Workers weekendWorks=requestWeekendWorker();
+        Workers holidayWorks=requestHolidayWorker();
+    }
+
+    private void makeSchedule(){
+
     }
 
     private Map<Month, Days> requestMonthAndDay() {
@@ -38,6 +48,30 @@ public class OncallController {
         } catch (IllegalArgumentException e) {
             errorView.printErrorMessage(e.getMessage());
             return requestMonthAndDay();
+        }
+    }
+
+    private Workers requestWeekendWorker(){
+        try{
+            Deque<Employee> employees=new ArrayDeque<>(Arrays.stream(Parser.splitWithDelimiter(inputView.getWeekDayWorkOrder()))
+                    .map(Employee::new)
+                    .toList());
+            return new Workers(employees);
+        } catch (IllegalArgumentException e) {
+            errorView.printErrorMessage(e.getMessage());
+            return requestWeekendWorker();
+        }
+    }
+
+    private Workers requestHolidayWorker(){
+        try{
+            Deque<Employee> employees=new ArrayDeque<>(Arrays.stream(Parser.splitWithDelimiter(inputView.getHolidayDayWorkOrder()))
+                    .map(Employee::new)
+                    .toList());
+            return new Workers(employees);
+        } catch (IllegalArgumentException e) {
+            errorView.printErrorMessage(e.getMessage());
+            return requestWeekendWorker();
         }
     }
 }
